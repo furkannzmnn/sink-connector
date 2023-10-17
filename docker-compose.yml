@@ -1,0 +1,90 @@
+version: '3.8'
+services:
+  sqlserver:
+    container_name: sqlserver
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    volumes:
+      - events_mssql:/var/opt/mssql
+    ports:
+      - 1433:1433
+    environment:
+      - ACCEPT_EULA=1
+      - SA_PASSWORD=Password123
+      # username
+      - MSSQL_USER=sa
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "59092:59092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:59092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "metro_search"
+
+  # ZooKeeper hizmeti, Kafka icin koordinasyon ve konfigurasyon depolama saglar.
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZK_SERVER_HEAP: "-Xmx256M -Xms256M"  # ZooKeeper'in bellek yapilandirmalarini belirler.
+    ports:
+      - 52181:2181  # ZooKeeper'a disaridan erisim saglar.
+
+  connect:
+    image: debezium/connect-jdbc-es:latest
+    build:
+      context: debezium-jdbc-es
+      dockerfile: Dockerfile
+      args:
+        DEBEZIUM_VERSION: 0.7
+    ports:
+      - 8083:8083
+      - 5005:5005
+    depends_on:
+      - kafka
+      - sqlserver
+      - elastic
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=connect
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9091:8080"  # Kafka UI'ya disaridan erisim saglar.
+    restart: always
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+    ports:
+      - "9200:9200"
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+volumes:
+    events_mssql:
