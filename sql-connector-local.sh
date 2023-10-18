@@ -13,7 +13,7 @@ curl -i -X POST -H "Accept:application/json" \
             "database.password": "Password123",
             "database.server.id": "184055",
             "database.dbname": "metro",
-            "database.server.name": "dbserver2",
+            "database.server.name": "127.0.0.1",
             "database.include": "product",
             "database.names": "metro",
             "database.history.kafka.bootstrap.servers": "kafka:9092",
@@ -24,7 +24,7 @@ curl -i -X POST -H "Accept:application/json" \
             "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
             "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
             "transforms.route.replacement": "$3",
-            "database.encrypt": false
+            "database.encrypt": false,
+            "topic.creation.default.partitions": "1"
              }
         }'
-
