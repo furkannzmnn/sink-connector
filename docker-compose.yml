@@ -30,16 +30,15 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS: "metro_search"
 
-  # ZooKeeper hizmeti, Kafka icin koordinasyon ve konfigurasyon depolama saglar.
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-      ZK_SERVER_HEAP: "-Xmx256M -Xms256M"  # ZooKeeper'in bellek yapilandirmalarini belirler.
+      ZK_SERVER_HEAP: "-Xmx256M -Xms256M"
     ports:
-      - 52181:2181  # ZooKeeper'a disaridan erisim saglar.
+      - 52181:2181
 
   connect:
     build:
@@ -65,7 +64,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - "9091:8080"  # Kafka UI'ya disaridan erisim saglar.
+      - "9091:8080"
     restart: always
     depends_on:
       - kafka
