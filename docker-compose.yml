@@ -76,11 +76,15 @@ services:
 
 
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
-    ports:
-      - "9200:9200"
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
     environment:
       - http.host=0.0.0.0
       - transport.host=127.0.0.1
+      - discovery.type=single-node
+      - validate_after_inactivity=0
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+

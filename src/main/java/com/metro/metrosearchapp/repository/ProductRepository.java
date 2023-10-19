@@ -1,7 +1,7 @@
 package com.metro.metrosearchapp.repository;
 
-import com.metro.metrosearchapp.model.elastic.Product;
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import com.metro.metrosearchapp.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProductRepository extends ElasticsearchRepository<Product, String> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
 }

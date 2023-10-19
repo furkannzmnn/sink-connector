@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class Product {
     @Id
-    private int brandId;
+    private Integer brandId;
     private String brandName;
     private int isItKG;
     private String packType;
